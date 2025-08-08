@@ -1,0 +1,598 @@
+/* FirstStep 컴포넌트 전용 스타일 - 첫 번째 이미지 디자인 기준 */
+
+.container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 30px;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+/* 홈으로 버튼 */
+.home-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #666;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    width: fit-content;
+}
+
+.home-btn:hover {
+    background: white;
+    color: #2563eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    flex: 1;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+}
+
+/* 헤더 */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+/* 단계 표시기 */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.step.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.step.inactive {
+    background: #e5e7eb;
+    color: #9ca3af;
+}
+
+/* 유형 선택 */
+.type-selector {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.selector-box {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+}
+
+.selector-box label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.selector-box select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+}
+
+.selector-box select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 추가 요청사항 입력 */
+.prompt-input-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.prompt-input-box {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+}
+
+.prompt-input-box label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.prompt-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.prompt-textarea::placeholder {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.prompt-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 스크립트 영역 - 첫 번째 이미지와 동일하게 */
+.script-area {
+    background: #374151;
+    color: white;
+    min-height: 200px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.script-placeholder {
+    color: #9ca3af;
+    text-align: center;
+    font-size: 16px;
+}
+
+.script-content {
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.completion-message {
+    color: #10b981;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.generate-btn {
+    padding: 12px 24px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.generate-btn:hover:not(.disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.generate-btn.disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 타이머 섹션 */
+.timer-section {
+    background: #f9fafb;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.timer-display {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.timer-text {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #3b82f6;
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 1s ease;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.timer-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timer-btn.start,
+.timer-btn.resume {
+    background: #3b82f6;
+    color: white;
+}
+
+.timer-btn.start:hover,
+.timer-btn.resume:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.timer-btn.pause {
+    background: #f97316;
+    color: white;
+}
+
+.timer-btn.pause:hover {
+    background: #ea580c;
+    transform: translateY(-1px);
+}
+
+.timer-btn.next,
+.timer-btn.complete {
+    background: #10b981;
+    color: white;
+}
+
+.timer-btn.next:hover,
+.timer-btn.complete:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* 사이드바 - 첫 번째 이미지와 동일한 스타일 */
+.sidebar {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.guide-panel {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+}
+
+.guide-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.guide-header h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+/* 훈련 목적 */
+.purpose-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    color: #6b7280;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.purpose-box {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.purpose-box p {
+    color: #1e3a8a;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: justify;
+    margin: 0;
+}
+
+/* 학습 단계 */
+.steps-section {
+    margin-bottom: 24px;
+}
+
+.step-item {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+}
+
+.step-item-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.step-number.blue { background: #3b82f6; }
+.step-number.orange { background: #f97316; }
+.step-number.green { background: #10b981; }
+.step-number.purple { background: #8b5cf6; }
+
+.step-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.step-desc {
+    color: #6b7280;
+    font-size: 12px;
+    margin-left: 36px;
+}
+
+/* 훈련 방법론 */
+.methodology-section {
+    background: rgba(168, 85, 247, 0.05);
+    border: 1px solid #c4b5fd;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.methodology-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.methodology-title {
+    font-weight: bold;
+    color: #7c3aed;
+    font-size: 14px;
+    flex: 1;
+}
+
+.methodology-content {
+    padding: 0 20px 16px;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.methodology-item {
+    margin-bottom: 8px;
+}
+
+/* 학습 효과 */
+.effects-section {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.effects-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.effects-title {
+    color: #166534;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.effects-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #065f46;
+    font-size: 13px;
+}
+
+.effects-list li {
+    margin-bottom: 4px;
+}
+
+/* 에러 메시지 */
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.error-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 14px;
+    flex: 1;
+}
+
+.error-retry-btn {
+    padding: 8px 16px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.error-retry-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+    
+    .main-content {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .step-indicator {
+        gap: 12px;
+    }
+    
+    .step {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+}

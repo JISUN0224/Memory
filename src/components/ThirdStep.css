@@ -1,0 +1,813 @@
+/* ThirdStep 컴포넌트 전용 스타일 - 기존 스타일과 통일성 유지 */
+
+/* 기존 FirstStep.css와 SecondStep.css의 기본 스타일들을 모두 포함 */
+.container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 30px;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+/* 홈으로 버튼 */
+.home-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #666;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    width: fit-content;
+}
+
+.home-btn:hover {
+    background: white;
+    color: #2563eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    flex: 1;
+    background: rgba(240, 249, 255, 0.7);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+}
+
+/* 헤더 */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+/* 단계 표시기 */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.step.active {
+    background: #f97316;
+    color: white;
+}
+
+.step.inactive {
+    background: #e5e7eb;
+    color: #9ca3af;
+}
+
+.step.completed {
+    background: #10b981;
+    color: white;
+}
+
+/* 네비게이션 버튼 */
+.navigation-buttons {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn.prev {
+    background: #6b7280;
+    color: white;
+}
+
+.nav-btn.prev:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+}
+
+/* 점수 표시 */
+.score-display {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.score-box {
+    background: #f9fafb;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.score-label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #f97316;
+}
+
+/* 3단계 전용 스타일 */
+
+/* 드래그 소스 영역 */
+.drag-source-area {
+    background: #fef3c7;
+    border: 2px dashed #f59e0b;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    min-height: 150px;
+}
+
+.drag-source-area h3 {
+    color: #92400e;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.sentences-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sentence-item {
+    background: white;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: move;
+    transition: all 0.2s;
+}
+
+.sentence-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.sentence-item.draggable:active {
+    opacity: 0.5;
+}
+
+.drag-handle {
+    color: #9ca3af;
+    font-size: 18px;
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.sentence-text {
+    flex: 1;
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.empty-message {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* 드롭 존 영역 */
+.drop-zones-area {
+    background: #f0fdf4;
+    border: 2px dashed #22c55e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    min-height: 300px;
+}
+
+.drop-zones-area h3 {
+    color: #166534;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.drop-zones-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.drop-zone {
+    background: white;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+}
+
+.drop-zone.drag-over {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.drop-zone.correct {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    border-style: solid;
+}
+
+.drop-zone.incorrect {
+    border-color: #ef4444;
+    background: #fef2f2;
+    border-style: solid;
+}
+
+.zone-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.zone-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    background: #9ca3af;
+}
+
+.zone-number.correct {
+    background: #22c55e;
+}
+
+.zone-number.incorrect {
+    background: #ef4444;
+}
+
+.remove-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: #ef4444;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.remove-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+.zone-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zone-sentence {
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.correct-indicator {
+    color: #22c55e;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.incorrect-indicator {
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.zone-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+    text-align: center;
+    font-style: italic;
+}
+
+/* 컨트롤 버튼들 */
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-btn.hint {
+    background: #f59e0b;
+    color: white;
+}
+
+.control-btn.hint:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+.control-btn.answer {
+    background: #f97316;
+    color: white;
+}
+
+.control-btn.answer:hover {
+    background: #ea580c;
+    transform: translateY(-1px);
+}
+
+.control-btn.shuffle {
+    background: #3b82f6;
+    color: white;
+}
+
+.control-btn.shuffle:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.control-btn.complete {
+    background: #8b5cf6;
+    color: white;
+}
+
+.control-btn.complete:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+}
+
+.control-btn.next {
+    background: #10b981;
+    color: white;
+}
+
+.control-btn.next:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* 힌트 영역 */
+.hints-area {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.hints-area h4 {
+    color: #92400e;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hints-area ul {
+    color: #92400e;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding-left: 20px;
+}
+
+.hints-area li {
+    margin-bottom: 8px;
+}
+
+/* 정답 영역 */
+.answers-area {
+    background: #f0fdf4;
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.answers-area h4 {
+    color: #166534;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.answer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.answer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+}
+
+.answer-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #22c55e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.answer-text {
+    flex: 1;
+    color: #166534;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* 완료 버튼 영역 */
+.completion-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* 사이드바 */
+.sidebar {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.guide-panel {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.guide-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.guide-header h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+/* 훈련 목적 */
+.purpose-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    color: #6b7280;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.purpose-box {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.purpose-box p {
+    color: #1e3a8a;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+/* 학습 단계 */
+.steps-section {
+    margin-bottom: 24px;
+}
+
+.step-item {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+}
+
+.step-item.current {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.step-item-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.step-number.blue { background: #3b82f6; }
+.step-number.orange { background: #f97316; }
+.step-number.green { background: #10b981; }
+.step-number.purple { background: #8b5cf6; }
+
+.step-item.current .step-number {
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+
+.step-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.step-desc {
+    color: #6b7280;
+    font-size: 12px;
+    margin-left: 36px;
+}
+
+/* 훈련 방법론 */
+.methodology-section {
+    background: rgba(168, 85, 247, 0.05);
+    border: 1px solid #c4b5fd;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.methodology-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.methodology-title {
+    font-weight: bold;
+    color: #7c3aed;
+    font-size: 14px;
+    flex: 1;
+}
+
+.methodology-content {
+    padding: 0 20px 16px;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.methodology-item {
+    margin-bottom: 8px;
+}
+
+/* 학습 효과 */
+.effects-section {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.effects-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.effects-title {
+    color: #166534;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.effects-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #065f46;
+    font-size: 13px;
+}
+
+.effects-list li {
+    margin-bottom: 4px;
+}
+
+/* 애니메이션 효과 */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* 드래그 피드백 효과 */
+.sentence-item:active {
+    transform: rotate(2deg);
+    z-index: 1000;
+}
+
+.drop-zone.drag-over {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* 애니메이션 효과 */
+.sentence-item,
+.drop-zone,
+.control-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.correct-indicator,
+.incorrect-indicator {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+    
+    .main-content {
+        max-width: none;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .control-btn {
+        width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .step-indicator {
+        gap: 12px;
+    }
+    
+    .step {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .sentence-item {
+        padding: 8px;
+    }
+    
+    .sentence-text {
+        font-size: 13px;
+    }
+    
+    .drop-zone {
+        padding: 12px;
+        min-height: 60px;
+    }
+    
+    .zone-placeholder {
+        font-size: 12px;
+    }
+} 

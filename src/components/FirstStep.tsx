@@ -8,8 +8,21 @@ interface ExerciseContent {
   difficulty: string;
 }
 
-const FirstStep: React.FC = () => {
+interface FirstStepProps {
+  onComplete: (data: {
+    script: string;
+    keyPoints: string[];
+    title: string;
+    duration: number;
+    category: string;
+    type: string;
+  }) => void;
+  onGoHome: () => void;
+}
+
+const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
   const [selectedType, setSelectedType] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('한국어');
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [exerciseContent, setExerciseContent] = useState<ExerciseContent | null>(null);
@@ -33,6 +46,30 @@ const FirstStep: React.FC = () => {
     };
   }, []);
 
+  // 홈으로 돌아가기 - 모든 상태 초기화
+  const handleGoHome = () => {
+    // 타이머 정리
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    
+    // 모든 상태 초기화
+    setSelectedType('');
+    setSelectedLanguage('한국어');
+    setCustomPrompt('');
+    setIsGenerating(false);
+    setExerciseContent(null);
+    setError(null);
+    setTimeRemaining(0);
+    setIsTimerRunning(false);
+    setIsTimerPaused(false);
+    setTimerCompleted(false);
+    
+    // 부모 컴포넌트에 홈으로 이동 알림
+    onGoHome();
+  };
+
   // 문제 생성 함수
   const generateExercise = async () => {
     if (!selectedType) return;
@@ -48,7 +85,13 @@ const FirstStep: React.FC = () => {
         throw new Error('Gemini API 키가 설정되지 않았습니다. .env 파일을 확인해주세요.');
       }
 
-             const prompt = `${selectedType} 유형의 통역사 메모리 훈련용 텍스트를 생성해주세요. ${customPrompt ? `추가 요청: ${customPrompt}` : ''} 한글 기준으로 120~150글자 정도의 한국어 텍스트로 작성해주세요. 제목이나 부가 설명 없이 본문만 출력하세요.`;
+             const prompt = `Write 3-4 ${selectedLanguage} sentences for interpreter memory training about ${selectedType}:
+Create a coherent story with logical flow and context. For example, instead of separate facts like "A visited X. B visited Y.", create connected narrative like "A visited X where they met B, who is from C...".
+${customPrompt ? `Additional requirements: ${customPrompt}` : ''}
+Output only the text, no explanations.`;
+
+      console.log('프롬프트 길이:', prompt.length);
+      console.log('예상 토큰 수:', Math.ceil(prompt.length / 4));
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -61,12 +104,12 @@ const FirstStep: React.FC = () => {
               text: prompt
             }]
           }],
-                     generationConfig: {
-             temperature: 0.7,
-             topK: 40,
-             topP: 0.95,
-             maxOutputTokens: 2048,
-           }
+          generationConfig: {
+            temperature: 0.3,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048
+          }
         })
       });
 
@@ -85,20 +128,41 @@ const FirstStep: React.FC = () => {
       }
 
              const candidate = data.candidates[0];
-       console.log('candidate.content:', candidate.content); // content 구조 확인
+       console.log('finishReason:', candidate.finishReason);
+       console.log('candidate.content:', candidate.content);
+       console.log('candidate.content.parts:', candidate.content?.parts);
+       console.log('candidate.content.parts[0]:', candidate.content?.parts?.[0]);
        
-       // finishReason 확인
        if (candidate.finishReason === 'MAX_TOKENS') {
          console.log('MAX_TOKENS로 인해 응답이 중단되었습니다.');
+         // 부분적으로라도 텍스트가 있는지 확인
+         const partialText = candidate.content?.parts?.[0]?.text;
+         if (partialText && partialText.trim().length > 50) {
+           console.log('부분 텍스트 사용:', partialText);
+           // 마지막 완전한 문장까지만 사용
+           const sentences = partialText.split(/[.!?。！？]/);
+           const completeSentences = sentences.slice(0, -1).join('.') + '.';
+           const cleanText = completeSentences.trim();
+           if (cleanText.length > 30) {
+             setExerciseContent({
+               script: cleanText,
+               duration: 60,
+               type: selectedType,
+               difficulty: 'medium'
+             });
+             setTimeRemaining(60);
+             return;
+           }
+         }
        }
        
        if (!candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
-         console.log('candidate.content.parts:', candidate.content?.parts); // parts 구조 확인
+         console.log('candidate.content.parts:', candidate.content?.parts);
          throw new Error('API 응답 구조가 올바르지 않습니다. finishReason: ' + candidate.finishReason);
        }
 
        const generatedText = candidate.content.parts[0].text;
-       console.log('generatedText:', generatedText); // 텍스트 확인
+       console.log('generatedText:', generatedText);
        
        if (!generatedText) {
          throw new Error('API 응답에서 텍스트를 찾을 수 없습니다.');
@@ -180,10 +244,10 @@ const FirstStep: React.FC = () => {
       {/* 메인 콘텐츠 */}
       <div className="main-content">
         {/* 홈으로 버튼 */}
-        <a href="#" className="home-btn">
+        <button onClick={handleGoHome} className="home-btn">
           <span>🏠</span>
           <span>홈으로</span>
-        </a>
+        </button>
         
         {/* 헤더 */}
         <div className="header">
@@ -199,7 +263,7 @@ const FirstStep: React.FC = () => {
           <div className="step inactive">4</div>
         </div>
         
-        {/* 유형 선택 */}
+        {/* 유형 및 언어 선택 */}
         <div className="type-selector">
           <div className="selector-box">
             <label>🎯 유형 선택</label>
@@ -214,6 +278,17 @@ const FirstStep: React.FC = () => {
               <option value="과정/절차">과정/절차</option>
             </select>
           </div>
+          
+          <div className="selector-box">
+            <label>🌐 언어 옵션</label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+            >
+              <option value="한국어">한국어</option>
+              <option value="중국어">중국어</option>
+            </select>
+          </div>
         </div>
         
         {/* 추가 요청사항 입력 */}
@@ -223,7 +298,7 @@ const FirstStep: React.FC = () => {
             <textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="해당 유형에 대한 추가 요청 사항을 입력해주세요. 예:난이도, 주제 등"
+              placeholder="(선택옵션)해당 유형에 대한 추가 요청 사항이 있다면 입력해주세요. 예:난이도, 주제 등"
               className="prompt-textarea"
             />
           </div>
@@ -277,7 +352,7 @@ const FirstStep: React.FC = () => {
               disabled={!selectedType || isGenerating}
               className={`generate-btn ${!selectedType || isGenerating ? 'disabled' : ''}`}
             >
-              {isGenerating ? '생성 중...' : '문제 생성'}
+              {isGenerating ? '생성 중...' : `${selectedLanguage} 문제 생성`}
             </button>
           </div>
         )}
@@ -311,7 +386,157 @@ const FirstStep: React.FC = () => {
                       <button onClick={pauseTimer} className="timer-btn pause">
                         ⏸️ 일시정지
                       </button>
-                      <button className="timer-btn next">
+                      <button 
+                        onClick={() => {
+                          if (exerciseContent) {
+                            const text = exerciseContent.script;
+                            let keyPoints: string[] = [];
+                            
+                            // 언어 자동 감지
+                            const isChinese = /[\u4e00-\u9fff]/.test(text);
+                            const isKorean = /[가-힣]/.test(text);
+                            
+                            console.log('언어 감지:', { isChinese, isKorean, selectedLanguage });
+                            
+                            if (isChinese) {
+                              // 🇨🇳 중국어 키워드 추출
+                              console.log('중국어 키워드 추출 시작');
+                              
+                              // 1. 순서/연결 표현어 (높은 우선순위)
+                              const orderWords = text.match(/首先|其次|然后|接着|最后|第一|第二|第三|另外|此外|同时|因此|所以|但是|然而/g) || [];
+                              
+                              // 2. 핵심 개념어 (2-4글자 명사)
+                              const conceptWords = text.match(/市场调研|需求分析|可行性评估|功能设计|界面规划|技术研发|内部测试|性能测试|兼容性测试|用户体验|批量生产|市场推广|产品发布/g) || [];
+                              
+                              // 3. 동작 표현 (동사+목적어)
+                              const actionWords = text.match(/进行[\u4e00-\u9fff]{1,4}|完成[\u4e00-\u9fff]{1,4}|启动[\u4e00-\u9fff]{1,4}|策划[\u4e00-\u9fff]{1,4}|执行[\u4e00-\u9fff]{1,4}/g) || [];
+                              
+                              // 4. 2-3글자 핵심 단어
+                              const shortWords = text.match(/[\u4e00-\u9fff]{2,3}(?=[，。、：；]|$)/g) || [];
+                              const filteredShortWords = shortWords.filter(word => 
+                                !orderWords.includes(word) && 
+                                !conceptWords.includes(word) &&
+                                !['进行', '完成', '启动', '策划', '执行'].includes(word)
+                              );
+                              
+                              // 우선순위대로 합치기
+                              keyPoints = [
+                                ...orderWords.slice(0, 3),           // 순서어 최대 3개
+                                ...conceptWords.slice(0, 4),         // 개념어 최대 4개  
+                                ...actionWords.slice(0, 2),          // 동작어 최대 2개
+                                ...filteredShortWords.slice(0, 3)    // 기타 단어 최대 3개
+                              ];
+                              
+                              // 중복 제거 및 길이 제한
+                              keyPoints = [...new Set(keyPoints)].slice(0, 8);
+                              
+                              console.log('중국어 키워드 추출 결과:', {
+                                orderWords,
+                                conceptWords, 
+                                actionWords,
+                                shortWords: filteredShortWords.slice(0, 3),
+                                final: keyPoints
+                              });
+                              
+                            } else if (isKorean) {
+                              // 🇰🇷 한국어 키워드 추출
+                              console.log('한국어 키워드 추출 시작');
+                              
+                              // 1. 순서/연결 표현어
+                              const orderWords = text.match(/먼저|첫째|둘째|셋째|다음|그리고|또한|마지막|따라서|그러나|하지만|즉|결국/g) || [];
+                              
+                              // 2. 명사 (2-4글자)
+                              const nouns = text.match(/[가-힣]{2,4}(?=[을를이가는은 .,!?])/g) || [];
+                              const filteredNouns = nouns.filter(word => 
+                                !orderWords.includes(word) &&
+                                !['것을', '것이', '하는', '되는', '있는', '없는'].includes(word)
+                              );
+                              
+                              // 3. 용언 어간 (동사/형용사)
+                              const verbs = text.match(/[가-힣]+(?=하[다며면고]|되[다며면고]|있[다며면고]|없[다며면고])/g) || [];
+                              const filteredVerbs = verbs.filter(word => word.length >= 2 && word.length <= 4);
+                              
+                              // 4. 공백으로 분리된 단어들 중 적절한 길이
+                              const words = text.split(/\s+/).filter(word => 
+                                /[가-힣]/.test(word) && 
+                                word.length >= 2 && 
+                                word.length <= 5 &&
+                                !word.match(/^[은는이가을를에서로부터까지]/)
+                              );
+                              
+                              // 우선순위대로 합치기
+                              keyPoints = [
+                                ...orderWords.slice(0, 2),           // 순서어 최대 2개
+                                ...filteredNouns.slice(0, 4),        // 명사 최대 4개
+                                ...filteredVerbs.slice(0, 2),        // 동사 최대 2개
+                                ...words.slice(0, 4)                 // 기타 단어 최대 4개
+                              ];
+                              
+                              // 중복 제거 및 길이 제한
+                              keyPoints = [...new Set(keyPoints)].slice(0, 6);
+                              
+                              console.log('한국어 키워드 추출 결과:', {
+                                orderWords,
+                                nouns: filteredNouns.slice(0, 4),
+                                verbs: filteredVerbs.slice(0, 2),
+                                words: words.slice(0, 4),
+                                final: keyPoints
+                              });
+                              
+                            } else {
+                              // 🌍 기타 언어 (영어 등)
+                              console.log('기타 언어 키워드 추출');
+                              const words = text.split(/\s+/);
+                              keyPoints = words.filter(word => word.length > 3 && word.length < 8).slice(0, 5);
+                            }
+                            
+                            // 키워드가 부족한 경우 추가 추출
+                            if (keyPoints.length < 3) {
+                              console.log('키워드 부족, 추가 추출 시도');
+                              
+                              if (isChinese) {
+                                // 중국어: 더 관대한 조건으로 재추출
+                                const additionalWords = text.match(/[\u4e00-\u9fff]{2,4}/g) || [];
+                                const newWords = additionalWords
+                                  .filter(word => !keyPoints.includes(word))
+                                  .slice(0, 5 - keyPoints.length);
+                                keyPoints = [...keyPoints, ...newWords];
+                              } else if (isKorean) {
+                                // 한국어: 더 관대한 조건으로 재추출  
+                                const additionalWords = text.match(/[가-힣]{2,4}/g) || [];
+                                const newWords = additionalWords
+                                  .filter(word => !keyPoints.includes(word))
+                                  .slice(0, 5 - keyPoints.length);
+                                keyPoints = [...keyPoints, ...newWords];
+                              }
+                            }
+                            
+                            console.log('최종 키워드:', keyPoints);
+                            
+                            // keyPoints가 여전히 비어있으면 기본값
+                            if (keyPoints.length === 0) {
+                              console.warn('키워드 추출 완전 실패, 기본값 사용');
+                              if (isChinese) {
+                                keyPoints = ['项目', '市场', '产品', '测试', '生产'];
+                              } else if (isKorean) {
+                                keyPoints = ['프로젝트', '시장', '제품', '테스트', '생산'];
+                              } else {
+                                keyPoints = ['project', 'market', 'product', 'test', 'production'];
+                              }
+                            }
+                            
+                            onComplete({
+                              script: exerciseContent.script,
+                              keyPoints: keyPoints,
+                              title: `${selectedType} 훈련`,
+                              duration: exerciseContent.duration,
+                              category: 'memory',
+                              type: selectedType
+                            });
+                          }
+                        }}
+                        className="timer-btn next"
+                      >
                         ➡️ 다음 단계
                       </button>
                     </>
