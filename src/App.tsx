@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import FirstStep from './components/FirstStep';
 import SecondStep from './components/SecondStep';
 import ThirdStep from './components/ThirdStep';
 import FourthStep from './components/FourthStep';
+import MemoryDashboard from './components/dashboard/MemoryDashboard';
 import './App.css';
 
 interface ExerciseData {
@@ -65,35 +67,43 @@ function App() {
   };
 
   return (
-    <div className="App">
-      {currentStep === 1 && (
-        <FirstStep onComplete={handleFirstStepComplete} onGoHome={handleGoHome} />
-      )}
-      {currentStep === 2 && exerciseData && (
-        <SecondStep 
-          exerciseData={exerciseData}
-          onComplete={handleSecondStepComplete}
-          onPrevious={handleSecondStepPrevious}
-          onGoHome={handleGoHome}
-        />
-      )}
-      {currentStep === 3 && exerciseData && (
-        <ThirdStep 
-          exerciseData={exerciseData}
-          onComplete={handleThirdStepComplete}
-          onPrevious={handleThirdStepPrevious}
-          onGoHome={handleGoHome}
-        />
-      )}
-      {currentStep === 4 && exerciseData && (
-        <FourthStep 
-          exerciseData={exerciseData}
-          onComplete={handleFourthStepComplete}
-          onPrevious={handleFourthStepPrevious}
-          onGoHome={handleGoHome}
-        />
-      )}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/dashboard" element={<MemoryDashboard />} />
+        <Route path="/" element={
+          <div className="App">
+            {currentStep === 1 && (
+              <FirstStep onComplete={handleFirstStepComplete} onGoHome={handleGoHome} />
+            )}
+            {currentStep === 2 && exerciseData && (
+              <SecondStep 
+                exerciseData={exerciseData}
+                onComplete={handleSecondStepComplete}
+                onPrevious={handleSecondStepPrevious}
+                onGoHome={handleGoHome}
+              />
+            )}
+            {currentStep === 3 && exerciseData && (
+              <ThirdStep 
+                exerciseData={exerciseData}
+                onComplete={handleThirdStepComplete}
+                onPrevious={handleThirdStepPrevious}
+                onGoHome={handleGoHome}
+              />
+            )}
+            {currentStep === 4 && exerciseData && (
+              <FourthStep 
+                exerciseData={exerciseData}
+                onComplete={handleFourthStepComplete}
+                onPrevious={handleFourthStepPrevious}
+                onGoHome={handleGoHome}
+              />
+            )}
+          </div>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

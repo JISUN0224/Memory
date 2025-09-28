@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './FirstStep.css';
+import { Tour } from './Tour';
+import LoginButton from './LoginButton';
+import { saveMemorySession } from '../utils/memoryDataUtils';
+import { auth } from '../firebase/config';
 
 interface ExerciseContent {
   script: string;
@@ -27,6 +31,8 @@ const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [exerciseContent, setExerciseContent] = useState<ExerciseContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [, setUsedModel] = useState<string | null>(null);
+  const [showTour, setShowTour] = useState(false);
   
   // 타이머 상태
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -46,6 +52,18 @@ const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
     };
   }, []);
 
+  // 컴포넌트 마운트 시 튜토리얼 표시 여부 확인
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('memory-tour-completed');
+    if (!hasSeenTour) {
+      // 약간의 지연 후 튜토리얼 시작
+      const timer = setTimeout(() => {
+        setShowTour(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // 홈으로 돌아가기 - 모든 상태 초기화
   const handleGoHome = () => {
     // 타이머 정리
@@ -61,6 +79,8 @@ const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
     setIsGenerating(false);
     setExerciseContent(null);
     setError(null);
+    setUsedModel(null);
+    setShowTour(false);
     setTimeRemaining(0);
     setIsTimerRunning(false);
     setIsTimerPaused(false);
@@ -68,6 +88,207 @@ const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
     
     // 부모 컴포넌트에 홈으로 이동 알림
     onGoHome();
+  };
+
+  // 튜토리얼 닫기 핸들러
+  const handleTourClose = (opts?: { dontShowAgain?: boolean }) => {
+    setShowTour(false);
+    if (opts?.dontShowAgain) {
+      localStorage.setItem('memory-tour-completed', 'true');
+    }
+  };
+
+  // 튜토리얼 스텝 정의
+  const tourSteps = [
+    {
+      id: 'type-selector',
+      title: '유형 및 언어 선택',
+      description: '먼저 연습할 유형(숫자 중심, 인명/지명 등)과 언어(한국어, 중국어)를 선택해주세요.',
+      targetSelector: '.type-selector',
+    },
+    {
+      id: 'prompt-input',
+      title: '추가 요청사항',
+      description: '필요에 따라 난이도나 특정 주제에 대한 추가 요청사항을 입력할 수 있습니다.',
+      targetSelector: '.prompt-input-container',
+    },
+    {
+      id: 'generate-button',
+      title: '문제 생성',
+      description: '모든 설정이 완료되면 이 버튼을 클릭하여 AI가 생성한 연습문제를 받아보세요.',
+      targetSelector: '.button-container',
+    },
+    {
+      id: 'guide-panel',
+      title: '메모리 훈련 가이드',
+      description: '오른쪽 패널에서 메모리 훈련의 목적, 단계별 학습 방법, 효과 등을 확인할 수 있습니다.',
+      targetSelector: '.guide-panel',
+      padding: 16,
+    },
+  ];
+
+  // 모델 fallback 설정
+  const modelConfigs = [
+    {
+      name: 'gemini-2.5-flash',
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+      config: {
+        temperature: 0.3,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048
+      }
+    },
+    {
+      name: 'gemini-2.5-flash-lite',
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent',
+      config: {
+        temperature: 0.3,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048
+      }
+    },
+    {
+      name: 'gemini-2.0-flash',
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      config: {
+        temperature: 0.3,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048
+      }
+    },
+    {
+      name: 'gemini-1.5-flash-8b',
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent',
+      config: {
+        temperature: 0.3,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048
+      }
+    },
+    {
+      name: 'gpt-4o-mini',
+      endpoint: 'https://api.openai.com/v1/chat/completions',
+      config: {
+        model: 'gpt-4o-mini',
+        temperature: 0.3,
+        max_tokens: 2048
+      }
+    },
+    {
+      name: 'gpt-3.5-turbo-0125',
+      endpoint: 'https://api.openai.com/v1/chat/completions',
+      config: {
+        model: 'gpt-3.5-turbo-0125',
+        temperature: 0.3,
+        max_tokens: 2048
+      }
+    },
+    {
+      name: 'gpt-4.1-mini',
+      endpoint: 'https://api.openai.com/v1/chat/completions',
+      config: {
+        model: 'gpt-4.1-mini',
+        temperature: 0.3,
+        max_tokens: 2048
+      }
+    }
+  ];
+
+  // API 호출 함수 (Gemini + GPT 지원)
+  const callAIAPI = async (modelConfig: typeof modelConfigs[0], prompt: string, apiKey: string) => {
+    
+    let requestBody: any;
+    let headers: any = {
+      'Content-Type': 'application/json',
+    };
+
+    // Gemini 모델인지 GPT 모델인지 확인
+    const isGeminiModel = modelConfig.name.startsWith('gemini');
+    
+    if (isGeminiModel) {
+      // Gemini API 호출 (URL 파라미터로 API 키 전달)
+      requestBody = {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: modelConfig.config
+      };
+    } else {
+      // GPT API 호출 (Authorization 헤더로 API 키 전달)
+      headers['Authorization'] = `Bearer ${apiKey}`;
+      requestBody = {
+        model: modelConfig.config.model,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }],
+        temperature: modelConfig.config.temperature,
+        max_tokens: modelConfig.config.max_tokens
+      };
+    }
+
+    const endpoint = isGeminiModel ? `${modelConfig.endpoint}?key=${apiKey}` : modelConfig.endpoint;
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = errorData.error?.message || response.statusText;
+      
+      // API limit 관련 에러인지 확인 (인증 에러는 제외)
+      const isLimitError = (errorMessage.includes('quota') || 
+                          errorMessage.includes('limit') || 
+                          errorMessage.includes('rate') ||
+                          errorMessage.includes('overloaded') ||
+                          errorMessage.includes('unavailable') ||
+                          response.status === 429 ||
+                          response.status === 503) &&
+                          !errorMessage.includes('authentication') &&
+                          !errorMessage.includes('Unauthorized') &&
+                          response.status !== 401;
+      
+      if (isLimitError) {
+        throw new Error(`LIMIT_ERROR: ${errorMessage}`);
+      } else {
+        throw new Error(`API_ERROR: ${errorMessage}`);
+      }
+    }
+
+    const data = await response.json();
+    
+    if (isGeminiModel) {
+      // Gemini 응답 처리
+      if (!data.candidates || !data.candidates[0]) {
+        throw new Error('API 응답에 candidates가 없습니다.');
+      }
+      return data;
+    } else {
+      // GPT 응답 처리
+      if (!data.choices || !data.choices[0]) {
+        throw new Error('API 응답에 choices가 없습니다.');
+      }
+      // GPT 응답을 Gemini 형식으로 변환
+      return {
+        candidates: [{
+          content: {
+            parts: [{
+              text: data.choices[0].message.content
+            }]
+          },
+          finishReason: data.choices[0].finish_reason
+        }]
+      };
+    }
   };
 
   // 문제 생성 함수
@@ -78,67 +299,70 @@ const FirstStep: React.FC<FirstStepProps> = ({ onComplete, onGoHome }) => {
     setError(null);
     
     try {
-      // API 키 설정
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      // API 키 설정 (Gemini 우선, 없으면 GPT 사용)
+      const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const gptApiKey = import.meta.env.VITE_OPENAI_API_KEY;
       
-      if (!apiKey) {
-        throw new Error('Gemini API 키가 설정되지 않았습니다. .env 파일을 확인해주세요.');
+      if (!geminiApiKey && !gptApiKey) {
+        throw new Error('API 키가 설정되지 않았습니다. .env 파일에 VITE_GEMINI_API_KEY 또는 VITE_OPENAI_API_KEY를 설정해주세요.');
       }
 
-             const prompt = `Write 3-4 ${selectedLanguage} sentences for interpreter memory training about ${selectedType}:
+      const prompt = `Write 3-4 ${selectedLanguage} sentences for interpreter memory training about ${selectedType}:
 Create a coherent story with logical flow and context. For example, instead of separate facts like "A visited X. B visited Y.", create connected narrative like "A visited X where they met B, who is from C...".
 ${customPrompt ? `Additional requirements: ${customPrompt}` : ''}
 Output only the text, no explanations.`;
 
-      console.log('프롬프트 길이:', prompt.length);
-      console.log('예상 토큰 수:', Math.ceil(prompt.length / 4));
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048
+      // 모델들을 순차적으로 시도
+      let lastError: Error | null = null;
+      let data: any = null;
+      let successfulModel: string | null = null;
+
+      // 최대 7개 모델까지 시도
+      const modelsToTry = modelConfigs.slice(0, 7);
+      
+      for (const modelConfig of modelsToTry) {
+        try {
+          // 모델에 따라 적절한 API 키 선택
+          const isGeminiModel = modelConfig.name.startsWith('gemini');
+          const apiKey = isGeminiModel ? geminiApiKey : gptApiKey;
+          
+          if (!apiKey) {
+            continue;
           }
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API 호출 실패: ${errorData.error?.message || response.statusText}`);
+          
+          data = await callAIAPI(modelConfig, prompt, apiKey);
+          successfulModel = modelConfig.name;
+          break; // 성공하면 루프 종료
+        } catch (error) {
+          lastError = error as Error;
+          
+          // API limit 에러가 아니면 다음 모델 시도하지 않음
+          if (!lastError.message.startsWith('LIMIT_ERROR:')) {
+            break;
+          }
+          
+        }
       }
 
-      const data = await response.json();
-      console.log('API 응답:', data); // 디버깅용
-      console.log('candidates[0]:', data.candidates?.[0]); // 더 자세한 디버깅
-
-      // 응답 구조 확인
-      if (!data.candidates || !data.candidates[0]) {
-        throw new Error('API 응답에 candidates가 없습니다.');
+      // 모든 모델이 실패한 경우
+      if (!data) {
+        const errorMessage = lastError?.message || '모든 모델에서 API 호출이 실패했습니다.';
+        if (errorMessage.includes('overloaded') || errorMessage.includes('unavailable')) {
+          throw new Error('현재 AI 서버가 과부하 상태입니다. 잠시 후 다시 시도해주세요.');
+        }
+        throw lastError || new Error('문제 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
+
+      // 성공한 모델 정보 저장
+      setUsedModel(successfulModel);
 
              const candidate = data.candidates[0];
-       console.log('finishReason:', candidate.finishReason);
-       console.log('candidate.content:', candidate.content);
-       console.log('candidate.content.parts:', candidate.content?.parts);
-       console.log('candidate.content.parts[0]:', candidate.content?.parts?.[0]);
        
        if (candidate.finishReason === 'MAX_TOKENS') {
-         console.log('MAX_TOKENS로 인해 응답이 중단되었습니다.');
          // 부분적으로라도 텍스트가 있는지 확인
          const partialText = candidate.content?.parts?.[0]?.text;
          if (partialText && partialText.trim().length > 50) {
-           console.log('부분 텍스트 사용:', partialText);
            // 마지막 완전한 문장까지만 사용
            const sentences = partialText.split(/[.!?。！？]/);
            const completeSentences = sentences.slice(0, -1).join('.') + '.';
@@ -157,12 +381,10 @@ Output only the text, no explanations.`;
        }
        
        if (!candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
-         console.log('candidate.content.parts:', candidate.content?.parts);
          throw new Error('API 응답 구조가 올바르지 않습니다. finishReason: ' + candidate.finishReason);
        }
 
        const generatedText = candidate.content.parts[0].text;
-       console.log('generatedText:', generatedText);
        
        if (!generatedText) {
          throw new Error('API 응답에서 텍스트를 찾을 수 없습니다.');
@@ -240,20 +462,35 @@ Output only the text, no explanations.`;
   };
 
   return (
-    <div className="container">
-      {/* 메인 콘텐츠 */}
-      <div className="main-content">
+    <>
+      {/* 로그인 버튼 - 오른쪽 상단 */}
+      <LoginButton className="login-button-top-right" />
+      
+      <div className="container">
+        {/* 메인 제목 */}
+        <div className="main-title-section">
+          <h1 className="main-title">5.3.1 AI 메모리 연습 시스템</h1>
+        </div>
+
+        {/* 메인 콘텐츠와 사이드바 래퍼 */}
+        <div className="content-wrapper">
+          {/* 메인 콘텐츠 */}
+          <div className="main-content">
         {/* 홈으로 버튼 */}
         <button onClick={handleGoHome} className="home-btn">
           <span>🏠</span>
           <span>홈으로</span>
         </button>
-        
-        {/* 헤더 */}
-        <div className="header">
-          <h1>🧠 통역 메모리 훈련</h1>
-          <p>1단계: 타이머 학습</p>
-        </div>
+          
+                   {/* 헤더 */}
+                     <div className="header">
+              <div className="header-content">
+                <div>
+                  <h1>🧠 통역 메모리 훈련</h1>
+                  <p>1단계: 타이머 학습</p>
+                </div>
+              </div>
+            </div>
         
         {/* 단계 표시기 */}
         <div className="step-indicator">
@@ -334,7 +571,7 @@ Output only the text, no explanations.`;
                   이제 2단계에서 기억한 내용을 테스트해보세요.
                 </div>
               ) : (
-                exerciseContent.script
+                                 exerciseContent.script
               )}
             </div>
           ) : (
@@ -387,7 +624,7 @@ Output only the text, no explanations.`;
                         ⏸️ 일시정지
                       </button>
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                           if (exerciseContent) {
                             const text = exerciseContent.script;
                             let keyPoints: string[] = [];
@@ -396,23 +633,21 @@ Output only the text, no explanations.`;
                             const isChinese = /[\u4e00-\u9fff]/.test(text);
                             const isKorean = /[가-힣]/.test(text);
                             
-                            console.log('언어 감지:', { isChinese, isKorean, selectedLanguage });
                             
                             if (isChinese) {
                               // 🇨🇳 중국어 키워드 추출
-                              console.log('중국어 키워드 추출 시작');
                               
                               // 1. 순서/연결 표현어 (높은 우선순위)
-                              const orderWords = text.match(/首先|其次|然后|接着|最后|第一|第二|第三|另外|此外|同时|因此|所以|但是|然而/g) || [];
+                              const orderWords: string[] = text.match(/首先|其次|然后|接着|最后|第一|第二|第三|另外|此外|同时|因此|所以|但是|然而/g) || [];
                               
                               // 2. 핵심 개념어 (2-4글자 명사)
-                              const conceptWords = text.match(/市场调研|需求分析|可行性评估|功能设计|界面规划|技术研发|内部测试|性能测试|兼容性测试|用户体验|批量生产|市场推广|产品发布/g) || [];
+                              const conceptWords: string[] = text.match(/市场调研|需求分析|可行性评估|功能设计|界面规划|技术研发|内部测试|性能测试|兼容性测试|用户体验|批量生产|市场推广|产品发布/g) || [];
                               
                               // 3. 동작 표현 (동사+목적어)
-                              const actionWords = text.match(/进行[\u4e00-\u9fff]{1,4}|完成[\u4e00-\u9fff]{1,4}|启动[\u4e00-\u9fff]{1,4}|策划[\u4e00-\u9fff]{1,4}|执行[\u4e00-\u9fff]{1,4}/g) || [];
+                              const actionWords: string[] = text.match(/进行[\u4e00-\u9fff]{1,4}|完成[\u4e00-\u9fff]{1,4}|启动[\u4e00-\u9fff]{1,4}|策划[\u4e00-\u9fff]{1,4}|执行[\u4e00-\u9fff]{1,4}/g) || [];
                               
                               // 4. 2-3글자 핵심 단어
-                              const shortWords = text.match(/[\u4e00-\u9fff]{2,3}(?=[，。、：；]|$)/g) || [];
+                              const shortWords: string[] = text.match(/[\u4e00-\u9fff]{2,3}(?=[，。、：；]|$)/g) || [];
                               const filteredShortWords = shortWords.filter(word => 
                                 !orderWords.includes(word) && 
                                 !conceptWords.includes(word) &&
@@ -430,20 +665,12 @@ Output only the text, no explanations.`;
                               // 중복 제거 및 길이 제한
                               keyPoints = [...new Set(keyPoints)].slice(0, 8);
                               
-                              console.log('중국어 키워드 추출 결과:', {
-                                orderWords,
-                                conceptWords, 
-                                actionWords,
-                                shortWords: filteredShortWords.slice(0, 3),
-                                final: keyPoints
-                              });
                               
                             } else if (isKorean) {
                               // 🇰🇷 한국어 키워드 추출
-                              console.log('한국어 키워드 추출 시작');
                               
                               // 1. 순서/연결 표현어
-                              const orderWords = text.match(/먼저|첫째|둘째|셋째|다음|그리고|또한|마지막|따라서|그러나|하지만|즉|결국/g) || [];
+                              const orderWords: string[] = text.match(/먼저|첫째|둘째|셋째|다음|그리고|또한|마지막|따라서|그러나|하지만|즉|결국/g) || [];
                               
                               // 2. 명사 (2-4글자)
                               const nouns = text.match(/[가-힣]{2,4}(?=[을를이가는은 .,!?])/g) || [];
@@ -475,24 +702,15 @@ Output only the text, no explanations.`;
                               // 중복 제거 및 길이 제한
                               keyPoints = [...new Set(keyPoints)].slice(0, 6);
                               
-                              console.log('한국어 키워드 추출 결과:', {
-                                orderWords,
-                                nouns: filteredNouns.slice(0, 4),
-                                verbs: filteredVerbs.slice(0, 2),
-                                words: words.slice(0, 4),
-                                final: keyPoints
-                              });
                               
                             } else {
                               // 🌍 기타 언어 (영어 등)
-                              console.log('기타 언어 키워드 추출');
                               const words = text.split(/\s+/);
                               keyPoints = words.filter(word => word.length > 3 && word.length < 8).slice(0, 5);
                             }
                             
                             // 키워드가 부족한 경우 추가 추출
                             if (keyPoints.length < 3) {
-                              console.log('키워드 부족, 추가 추출 시도');
                               
                               if (isChinese) {
                                 // 중국어: 더 관대한 조건으로 재추출
@@ -511,7 +729,6 @@ Output only the text, no explanations.`;
                               }
                             }
                             
-                            console.log('최종 키워드:', keyPoints);
                             
                             // keyPoints가 여전히 비어있으면 기본값
                             if (keyPoints.length === 0) {
@@ -525,6 +742,39 @@ Output only the text, no explanations.`;
                               }
                             }
                             
+                            // Firebase에 메모리 훈련 세션 저장
+                            if (auth.currentUser) {
+                              try {
+                                await saveMemorySession({
+                                  date: new Date().toISOString(),
+                                  exerciseType: selectedType,
+                                  totalScore: 100, // 1단계 완료 시 기본 점수
+                                  stepCount: 1, // 1단계만 완료
+                                  studyTime: exerciseContent.duration - timeRemaining,
+                                  averageScore: 100,
+                                  language: selectedLanguage,
+                                  steps: [{
+                                    stepId: 1,
+                                    stepName: '타이머 학습',
+                                    score: 100,
+                                    timeUsed: exerciseContent.duration - timeRemaining,
+                                    completed: true,
+                                    details: {
+                                      script: exerciseContent.script,
+                                      keyPoints: keyPoints
+                                    }
+                                  }],
+                                  metadata: {
+                                    difficulty: 'medium',
+                                    customPrompt: customPrompt,
+                                    aiGenerated: true
+                                  }
+                                });
+                              } catch (error) {
+                                console.error('세션 저장 실패:', error);
+                              }
+                            }
+
                             onComplete({
                               script: exerciseContent.script,
                               keyPoints: keyPoints,
@@ -550,10 +800,10 @@ Output only the text, no explanations.`;
             </div>
           </div>
         )}
-      </div>
-      
-      {/* 사이드바 */}
-      <div className="sidebar">
+          </div>
+          
+          {/* 사이드바 */}
+          <div className="sidebar">
         <div className="guide-panel">
           {/* 헤더 */}
           <div className="guide-header">
@@ -634,10 +884,19 @@ Output only the text, no explanations.`;
               <li>실전 통역 능력 향상</li>
             </ul>
           </div>
+                 </div>
+           </div>
+         </div>
+
+         {/* 튜토리얼 */}
+         <Tour
+           steps={tourSteps}
+           visible={showTour}
+           onClose={handleTourClose}
+         />
         </div>
-      </div>
-    </div>
-  );
+      </>
+    );
 };
 
 export default FirstStep; 

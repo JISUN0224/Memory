@@ -44,7 +44,7 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
   const [showOriginal, setShowOriginal] = useState(false);
   const [keywordChecks, setKeywordChecks] = useState<KeywordCheck[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
+  const [, setAnalysisHistory] = useState<AnalysisResult[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 키워드 체크리스트 초기화
@@ -322,10 +322,10 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
           </div>
         )}
 
-        {/* AI 분석 결과 */}
+        {/* 분석 결과 */}
         {analysisResult && (
           <div className="analysis-results">
-            <h3>🤖 AI 분석 결과</h3>
+            <h3>📊 분석 결과</h3>
             
             {/* 종합 점수 */}
             <div className="overall-score">

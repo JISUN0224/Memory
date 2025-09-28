@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "myprojectweb-doctor"
+  },
+  "targets": {
+    "myprojectweb-doctor": {
+      "hosting": {
+        "memory": [
+          "myprojectweb-memo"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

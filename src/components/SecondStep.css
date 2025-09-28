@@ -33,7 +33,7 @@
 /* 메인 콘텐츠 */
 .main-content {
     flex: 1;
-    background: rgba(240, 249, 255, 0.7);
+    background: #e6f7ed;
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -326,7 +326,7 @@
 
 /* 사이드바 */
 .sidebar {
-    width: 320px;
+    width: 340px;
     flex-shrink: 0;
 }
 
@@ -335,6 +335,9 @@
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     padding: 24px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 .guide-header {

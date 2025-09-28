@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SecondStep.css';
+import { saveMemorySession } from '../utils/memoryDataUtils';
+import { auth } from '../firebase/config';
 
 interface SecondStepProps {
   exerciseData: {
@@ -175,8 +177,52 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
   }, [blankAnswers]);
 
   // 완료 처리
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setIsCompleted(true);
+    
+    // Firebase에 메모리 훈련 세션 저장
+    if (auth.currentUser) {
+      try {
+        await saveMemorySession({
+          date: new Date().toISOString(),
+          exerciseType: exerciseData.type,
+          totalScore: currentScore,
+          stepCount: 2, // 2단계까지 완료
+          studyTime: 300, // 5분 추정
+          averageScore: currentScore,
+          language: '한국어', // 기본값
+          steps: [{
+            stepId: 1,
+            stepName: '타이머 학습',
+            score: 100,
+            timeUsed: 60,
+            completed: true,
+            details: {
+              script: exerciseData.script,
+              keyPoints: exerciseData.keyPoints
+            }
+          }, {
+            stepId: 2,
+            stepName: '빈칸 채우기',
+            score: currentScore,
+            timeUsed: 300,
+            completed: true,
+            details: {
+              script: exerciseData.script,
+              keyPoints: exerciseData.keyPoints
+            }
+          }],
+          metadata: {
+            difficulty: 'medium',
+            aiGenerated: true
+          }
+        });
+        console.log('2단계 메모리 훈련 세션이 저장되었습니다.');
+      } catch (error) {
+        console.error('세션 저장 실패:', error);
+      }
+    }
+    
     onComplete(currentScore);
   };
 
@@ -284,7 +330,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
             )}
             
             <div className="hint-list">
-              {blankAnswers.map((blank, index) => {
+              {blankAnswers.map((blank) => {
                 return (
                   <button
                     key={blank.id}
@@ -313,7 +359,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
           
           {isCompleted && (
             <button 
-              onClick={() => onComplete(currentScore)}
+              onClick={handleComplete}
               className="control-btn next"
             >
               ➡️ 3단계로 이동

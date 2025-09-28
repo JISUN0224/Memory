@@ -2,6 +2,7 @@
 
 .container {
     display: flex;
+    flex-direction: column;
     max-width: 1400px;
     margin: 0 auto;
     gap: 30px;
@@ -9,6 +10,43 @@
     padding: 20px;
     min-height: 100vh;
     background: #f8f9fa;
+    position: relative;
+}
+
+/* 메인 제목 섹션 */
+.main-title-section {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px 0;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a365d;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 메인 콘텐츠와 사이드바를 가로로 배치하는 컨테이너 */
+.content-wrapper {
+    display: flex;
+    width: 100%;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* 로그인 버튼 - 오른쪽 상단 */
+.login-button-top-right {
+    position: fixed !important;
+    top: 20px !important;
+    right: 100px !important;
+    z-index: 9999 !important;
 }
 
 /* 홈으로 버튼 */
@@ -25,6 +63,8 @@
     transition: all 0.2s;
     margin-bottom: 20px;
     width: fit-content;
+    border: none;
+    cursor: pointer;
 }
 
 .home-btn:hover {
@@ -36,7 +76,7 @@
 /* 메인 콘텐츠 */
 .main-content {
     flex: 1;
-    background: white;
+    background: #e6f7ed;
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -47,6 +87,14 @@
 .header {
     text-align: center;
     margin-bottom: 40px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .header h1 {
@@ -348,7 +396,7 @@
 
 /* 사이드바 - 첫 번째 이미지와 동일한 스타일 */
 .sidebar {
-    width: 320px;
+    width: 340px;
     flex-shrink: 0;
 }
 
@@ -357,6 +405,9 @@
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     padding: 24px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 .guide-header {
@@ -563,6 +614,11 @@
         gap: 20px;
     }
     
+    .content-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
     .sidebar {
         width: 100%;
         order: 2;
@@ -570,6 +626,10 @@
     
     .main-content {
         max-width: none;
+    }
+    
+    .main-title {
+        font-size: 2rem;
     }
 }
 
@@ -580,6 +640,10 @@
     
     .main-content {
         padding: 20px;
+    }
+    
+    .main-title {
+        font-size: 1.5rem;
     }
     
     .header h1 {

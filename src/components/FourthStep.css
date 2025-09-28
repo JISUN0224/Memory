@@ -14,7 +14,7 @@
 
 .main-content {
     flex: 1;
-    background: white;
+    background: #e6f7ed;
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -383,7 +383,7 @@
     border: 1px solid #e2e8f0;
 }
 
-/* AI 분석 결과 */
+/* 분석 결과 */
 .analysis-results {
     background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
     border: 2px solid #0ea5e9;
@@ -683,7 +683,7 @@
 
 /* 사이드바 스타일 */
 .sidebar {
-    width: 320px;
+    width: 340px;
     flex-shrink: 0;
 }
 
@@ -692,6 +692,9 @@
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     padding: 24px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 .guide-header {
