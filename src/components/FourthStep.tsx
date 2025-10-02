@@ -1,6 +1,55 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './FourthStep.css';
 
+// 웹 스피치 API 타입 정의
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  onstart: (() => void) | null;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 interface FourthStepProps {
   exerciseData: {
     script: string;
@@ -46,6 +95,88 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
   const [isCompleted, setIsCompleted] = useState(false);
   const [, setAnalysisHistory] = useState<AnalysisResult[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // 음성 인식 관련 상태
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // 음성 인식 지원 여부 확인 및 초기화
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'ko-KR'; // 한국어 설정
+      
+      recognition.onstart = () => {
+        setIsListening(true);
+        setInterimTranscript('');
+      };
+      
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        if (finalTranscript) {
+          setUserText(prev => prev + finalTranscript);
+          setInterimTranscript('');
+        } else {
+          setInterimTranscript(interimTranscript);
+        }
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('음성 인식 오류:', event.error);
+        setIsListening(false);
+        setInterimTranscript('');
+        
+        let errorMessage = '음성 인식 중 오류가 발생했습니다.';
+        switch (event.error) {
+          case 'no-speech':
+            errorMessage = '음성이 감지되지 않았습니다. 다시 시도해주세요.';
+            break;
+          case 'audio-capture':
+            errorMessage = '마이크에 접근할 수 없습니다. 마이크 권한을 확인해주세요.';
+            break;
+          case 'not-allowed':
+            errorMessage = '마이크 사용 권한이 거부되었습니다. 브라우저 설정을 확인해주세요.';
+            break;
+          case 'network':
+            errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+            break;
+        }
+        alert(errorMessage);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+        setInterimTranscript('');
+      };
+      
+      recognitionRef.current = recognition;
+    } else {
+      setSpeechSupported(false);
+    }
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   // 키워드 체크리스트 초기화
   useEffect(() => {
@@ -74,6 +205,39 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
         ? { ...check, isManuallyChecked: !check.isManuallyChecked }
         : check
     ));
+  };
+
+  // 음성 인식 시작
+  const startListening = () => {
+    if (!speechSupported) {
+      alert('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome, Edge, Safari 최신 버전을 사용해주세요.');
+      return;
+    }
+    
+    if (recognitionRef.current && !isListening) {
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('음성 인식 시작 오류:', error);
+        alert('음성 인식을 시작할 수 없습니다. 마이크 권한을 확인해주세요.');
+      }
+    }
+  };
+
+  // 음성 인식 중지
+  const stopListening = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+    }
+  };
+
+  // 음성 인식 토글
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   // 로컬 분석 함수
@@ -205,8 +369,10 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
 
   return (
     <div className="container">
-      {/* 메인 콘텐츠 */}
-      <div className="main-content">
+      {/* 메인 콘텐츠와 사이드바 래퍼 */}
+      <div className="content-wrapper">
+        {/* 메인 콘텐츠 */}
+        <div className="main-content">
         {/* 홈으로 버튼 */}
         <button onClick={onGoHome} className="home-btn">
           <span>🏠</span>
@@ -244,11 +410,23 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
         <div className="text-input-area">
           <div className="input-header">
             <label>📝 스토리 작성</label>
-            <div className="char-counter">
-              <span className={userText.length < 50 ? 'insufficient' : 'sufficient'}>
-                {userText.length} / 1000자
-              </span>
-              {userText.length < 50 && <span className="min-notice">(최소 50자)</span>}
+            <div className="input-controls">
+              <div className="char-counter">
+                <span className={userText.length < 50 ? 'insufficient' : 'sufficient'}>
+                  {userText.length} / 1000자
+                </span>
+                {userText.length < 50 && <span className="min-notice">(최소 50자)</span>}
+              </div>
+              {speechSupported && (
+                <button
+                  onClick={toggleListening}
+                  disabled={isCompleted}
+                  className={`voice-btn ${isListening ? 'listening' : ''}`}
+                  title={isListening ? '음성 인식 중지' : '음성 인식 시작'}
+                >
+                  {isListening ? '🎤 음성 인식 중...' : '🎤 음성 입력'}
+                </button>
+              )}
             </div>
           </div>
           
@@ -256,11 +434,27 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
             ref={textareaRef}
             value={userText}
             onChange={(e) => setUserText(e.target.value)}
-            placeholder="여기에 기억한 내용을 자신의 말로 작성해주세요...&#10;&#10;예시:&#10;- 핵심 키워드들을 포함하여 작성&#10;- 논리적인 순서로 구성&#10;- 완전한 문장으로 표현"
+            placeholder="여기에 기억한 내용을 자신의 말로 작성해주세요...&#10;&#10;예시:&#10;- 핵심 키워드들을 포함하여 작성&#10;- 논리적인 순서로 구성&#10;- 완전한 문장으로 표현&#10;&#10;💡 팁: 마이크 버튼을 클릭하여 음성으로도 입력할 수 있습니다!"
             className="story-textarea"
             maxLength={1000}
             disabled={isCompleted}
           />
+          
+          {/* 실시간 음성 인식 결과 표시 */}
+          {isListening && interimTranscript && (
+            <div className="interim-transcript">
+              <div className="interim-label">🎤 실시간 인식 중:</div>
+              <div className="interim-text">{interimTranscript}</div>
+            </div>
+          )}
+          
+          {/* 음성 인식 상태 표시 */}
+          {isListening && (
+            <div className="listening-indicator">
+              <div className="pulse-dot"></div>
+              <span>음성을 듣고 있습니다...</span>
+            </div>
+          )}
         </div>
 
         {/* 키워드 체크리스트 */}
@@ -483,10 +677,10 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
             </div>
           )}
         </div>
-      </div>
-      
-      {/* 사이드바 */}
-      <div className="sidebar">
+        </div>
+        
+        {/* 사이드바 */}
+        <div className="sidebar">
         <div className="guide-panel">
           {/* 헤더 */}
           <div className="guide-header">
@@ -576,6 +770,7 @@ const FourthStep: React.FC<FourthStepProps> = ({ exerciseData, onComplete, onPre
               <li>자연스러운 표현을 사용하세요</li>
             </ul>
           </div>
+        </div>
         </div>
       </div>
     </div>

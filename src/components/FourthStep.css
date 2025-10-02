@@ -3,6 +3,7 @@
 /* 기존 공통 스타일들 (FirstStep.css에서 상속) */
 .container {
     display: flex;
+    flex-direction: column;
     max-width: 1400px;
     margin: 0 auto;
     gap: 30px;
@@ -10,6 +11,13 @@
     padding: 20px;
     min-height: 100vh;
     background: #f8f9fa;
+}
+
+.content-wrapper {
+    display: flex;
+    width: 100%;
+    gap: 30px;
+    align-items: flex-start;
 }
 
 .main-content {
@@ -164,6 +172,12 @@
     margin-bottom: 12px;
 }
 
+.input-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 .input-header label {
     font-size: 16px;
     font-weight: 600;
@@ -215,6 +229,123 @@
 .story-textarea:disabled {
     background: #f9fafb;
     color: #6b7280;
+}
+
+/* 음성 인식 버튼 */
+.voice-btn {
+    padding: 8px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.voice-btn:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.voice-btn:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.voice-btn.listening {
+    background: #ef4444;
+    animation: pulse-red 1.5s infinite;
+}
+
+.voice-btn.listening:hover {
+    background: #dc2626;
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+}
+
+/* 실시간 음성 인식 결과 */
+.interim-transcript {
+    background: #f0f9ff;
+    border: 2px solid #0ea5e9;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.interim-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0c4a6e;
+    margin-bottom: 4px;
+}
+
+.interim-text {
+    font-size: 14px;
+    color: #0369a1;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 음성 인식 상태 표시 */
+.listening-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #991b1b;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
 }
 
 /* 키워드 체크리스트 */
@@ -853,8 +984,13 @@
 }
 
 /* 반응형 디자인 */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .container {
+        gap: 20px;
+        padding: 10px;
+    }
+    
+    .content-wrapper {
         flex-direction: column;
         gap: 20px;
     }
@@ -866,23 +1002,6 @@
     
     .main-content {
         max-width: none;
-    }
-    
-    .detailed-scores {
-        grid-template-columns: 1fr;
-    }
-    
-    .detailed-feedback {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
-    
-    .main-content {
         padding: 20px;
     }
     
@@ -921,6 +1040,39 @@
     
     .score-number {
         font-size: 2rem;
+    }
+    
+    .detailed-scores {
+        grid-template-columns: 1fr;
+    }
+    
+    .detailed-feedback {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 음성 인식 관련 반응형 */
+    .input-controls {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    
+    .voice-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .interim-transcript {
+        padding: 8px;
+    }
+    
+    .interim-text {
+        font-size: 13px;
+    }
+    
+    .listening-indicator {
+        font-size: 12px;
+        padding: 6px 10px;
     }
 }
 

@@ -233,8 +233,10 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
 
   return (
     <div className="container">
-      {/* 메인 콘텐츠 */}
-      <div className="main-content">
+      {/* 메인 콘텐츠와 사이드바 래퍼 */}
+      <div className="content-wrapper">
+        {/* 메인 콘텐츠 */}
+        <div className="main-content">
         {/* 홈으로 버튼 */}
         <button onClick={onGoHome} className="home-btn">
           <span>🏠</span>
@@ -366,10 +368,10 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
             </button>
           )}
         </div>
-      </div>
-      
-      {/* 사이드바 */}
-      <div className="sidebar">
+        </div>
+        
+        {/* 사이드바 */}
+        <div className="sidebar">
         <div className="guide-panel">
           {/* 헤더 */}
           <div className="guide-header">
@@ -450,6 +452,7 @@ const SecondStep: React.FC<SecondStepProps> = ({ exerciseData, onComplete, onPre
               <li>실전 통역 능력 향상</li>
             </ul>
           </div>
+        </div>
         </div>
       </div>
     </div>

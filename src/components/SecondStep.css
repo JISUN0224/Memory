@@ -2,8 +2,19 @@
 
 .container {
     display: flex;
+    flex-direction: column;
     max-width: 1400px;
     margin: 0 auto;
+    gap: 30px;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.content-wrapper {
+    display: flex;
+    width: 100%;
     gap: 30px;
     align-items: flex-start;
 }
@@ -270,6 +281,34 @@
     cursor: not-allowed;
 }
 
+.hint-content {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.hint-content p {
+    color: #92400e;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* 컨트롤 버튼들 */
 .control-buttons {
     display: flex;
@@ -495,4 +534,61 @@
 
 .effects-list li {
     margin-bottom: 4px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .container {
+        gap: 20px;
+        padding: 10px;
+    }
+    
+    .content-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+    
+    .main-content {
+        max-width: none;
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .step-indicator {
+        gap: 12px;
+    }
+    
+    .step {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .control-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .hint-list {
+        justify-content: center;
+    }
+    
+    .blank-input {
+        min-width: 50px;
+        max-width: 70px;
+        font-size: 12px;
+    }
 }
